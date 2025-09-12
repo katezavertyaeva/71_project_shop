@@ -1,6 +1,7 @@
 package app.repository;
 
 import app.domain.Customer;
+import app.domain.Product;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -21,7 +22,7 @@ public class CustomerRepository {
     // Поле, которое хранит максимальный идентификатор, сохраннёный в БД
     private int maxId;
 
-    public CustomerRepository () throws IOException {
+    public CustomerRepository() throws IOException {
         database = new File("database/customer.txt");
         mapper = new ObjectMapper();
 
@@ -65,12 +66,18 @@ public class CustomerRepository {
     public void update(Customer customer) throws IOException {
         int id = customer.getId();
         String newName = customer.getName();
+        boolean active = customer.isActive();
+        List<Product> products = customer.getProducts();
 
         List<Customer> customers = findAll();
         customers
                 .stream()
                 .filter(x -> x.getId() == id)
-                .forEach(x -> x.setName(newName));
+                .forEach(x -> {
+                    x.setName(newName);
+                    x.setActive(active);
+                    x.setProducts(products);
+                });
 
         mapper.writeValue(database, customers);
     }
